@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'DNS RotondaC';
+  src: local('DNS RotondaC'),
+       url('./../fonts/DNS RotondaC.ttf') format("ttf");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'DNS RotondaC Bold';
+  src: local('DNS RotondaC'),
+       url('./../fonts/DNS RotondaC-Bold.ttf') format("ttf");
+  font-weight: bold;
+}
+

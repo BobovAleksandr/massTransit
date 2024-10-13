@@ -1,0 +1,52 @@
+@import url('./reset.css');
+@import url('./fonts.css');
+@import url('./variables.css');
+@import url('./fonts.css');
+@import url('./blocks/section.css');
+@import url('./blocks/table.css');
+
+.page {
+  font-family: 'DNS RotondaC', sans-serif;
+  display: grid;
+  align-items: start;
+  gap: 30px;
+  grid-template-columns: repeat(3, max-content);
+}
+
+.disabled {
+  pointer-events: none;
+  user-select: none;
+}
+
+.hidden {
+  visibility: hidden;
+  user-select: none;
+  opacity: 0;
+}
+
+.label {
+  height: 30px;
+  display: grid;
+  grid-template-columns: 185px max-content;
+  gap: 20px;
+  justify-items: start;
+}
+
+.label-header {
+  width: 185px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.input {
+  text-align: center;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  height: 100%;
+  width: 300px;
+}
+
+.input-shipping-value {
+  width: 40px;
+}
