@@ -65,16 +65,18 @@ fillShopRecieverSelect()
 function filterShipping() {
   // Исключаем магазины без товара
   let shippingList = shopList.filter(shop => shop.itemValue > 0)
+  // resetCurrentShipValue()
+  shippingList.forEach(shop => shop.fillToShipValue(shop.itemValue))
   // Исключаем филиал получатель
   if (selectShopReciever.value) {
     const currentReciever = shopList.find(shop => shop.name === selectShopReciever.value)
     shippingList = shippingList.filter(shop => shop.name !== currentReciever.name)
-    // shippingList.forEach(shop => shop.fillToShipValue(shop.itemValue))
+    shippingList.forEach(shop => shop.fillToShipValue(shop.itemValue))
   }
   // Исключаем магазины с витринными товарами
   if (checkboxItemNew.checked) {
     shippingList = shippingList.filter(shop => shop.newItemValue > 0)
-    // shippingList.forEach(shop => shop.fillToShipValue(shop.newItemValue))
+    shippingList.forEach(shop => shop.fillToShipValue(shop.newItemValue))
   }
   // Исключаем склады
   if (checkboxNotWarehouse.checked) {
@@ -82,8 +84,9 @@ function filterShipping() {
   }
   if (checkboxDontMakeEmpty.checked) {
     shippingList = shippingList.filter(shop => shop.notForEmptyValue > 0)
-    // shippingList.forEach(shop => shop.fillToShipValue(shop.notForEmptyValue))
+    shippingList.forEach(shop => shop.fillToShipValue(shop.notForEmptyValue))
   }
+  console.log(shippingList)
   return shippingList
 }
 
@@ -103,11 +106,19 @@ function uncheckShipOption(evt) {
   }
 }
 
-function renderNewResultRow() {
+function clearResultTable() {
   const currentresultTable = [...tableResult.querySelectorAll('.table-row')]
   currentresultTable.forEach(element => element.remove())
+}
+
+function resetCurrentShipValue() {
+  shopList.forEach(shop => shop.currentShipValue = 0)
+}
+
+function renderNewResultRow() {
+  clearResultTable()
   filterShipping().forEach(shop => {
-    if (shop.toShipValue > 0) {
+    if (shop.currentShipValue > 0) {
       const reciever = shopList.find(shop => shop.isCurrentReciever === true) ? shopList.find(shop => shop.isCurrentReciever === true) : ""
       tableResult.append(shop.createShippingListRowElement(shippingListRowTemplate, reciever.id, inputItemId.value))
     }
@@ -138,10 +149,23 @@ inputAddFile.addEventListener('change', () => {
 })
 
 formAuto.addEventListener('submit', evt => {
-  let currentShippingValue = 0
   evt.preventDefault()
-  filterShipping()
+  clearResultTable()
+  resetCurrentShipValue()
+  let currentShippingValueTotal = 0
+  const currentShippingList = filterShipping()
+  const reciever = shopList.find(shop => shop.isCurrentReciever === true) ? shopList.find(shop => shop.isCurrentReciever === true) : ""
+  for (let i = 0; i < +inputItemValue.value; i++) {
+    // КОСЯК
+    const currentNotFullShop = currentShippingList.find(shop => shop.currentShipValue < shop.toShipValue)
+    currentNotFullShop.currentShipValue++
+    currentShippingValueTotal++
+    if (currentNotFullShop.currentShipValue === currentNotFullShop.toShipValue || currentShippingValueTotal === +inputItemValue.value) {
+      tableResult.append(currentNotFullShop.createShippingListRowElement(shippingListRowTemplate, reciever.id, inputItemId.value))
+    }
+  }
 })
+
 
 inputItemId.addEventListener('change', renderNewResultRow)
 

@@ -11,6 +11,7 @@ class Shop {
   newItemValue = 0;
   notForEmptyValue = 0;
   toShipValue = 0;
+  currentShipValue = 0;
   priority;
   renderResultTable;
   // Возвращает элемент строки таблицы для списка магазинов
@@ -18,13 +19,14 @@ class Shop {
     const newShopElement = template.cloneNode(true)
     newShopElement.querySelector('.table-data-shop-name').textContent = this.name
     newShopElement.querySelector('.table-data-item-value').textContent = this.itemValue
-    const toShipValue = newShopElement.querySelector('.input-shipping-value')
-    toShipValue.addEventListener('change', (evt) => {
-      if (+toShipValue.value <= this.itemValue) {
-        this.toShipValue = +toShipValue.value
+    const currentShipValueInput = newShopElement.querySelector('.input-shipping-value')
+    currentShipValueInput.addEventListener('change', (evt) => {
+      if (+currentShipValueInput.value <= this.itemValue) {
+        this.currentShipValue = +currentShipValueInput.value
+        console.log(this.currentShipValue)
       } else {
-        this.toShipValue = this.itemValue
-        toShipValue.value = this.itemValue
+        this.currentShipValue = this.itemValue
+        currentShipValueInput.value = this.itemValue
       }
       this.renderResultTable()
       this.resetToShipValue(evt)
@@ -38,8 +40,8 @@ class Shop {
     newShopElement.querySelector('.table-data-shop-shipper-id').textContent = this.id
     newShopElement.querySelector('.table-data-shop-reciever-id').textContent = recieverId
     newShopElement.querySelector('.table-data-shop-item-id').textContent = itemId
-    const inputToshipValue = newShopElement.querySelector('.table-data-shop-shipping-value')
-    inputToshipValue.textContent = this.toShipValue
+    const toshipValue = newShopElement.querySelector('.table-data-shop-shipping-value')
+    toshipValue.textContent = this.currentShipValue
     return newShopElement
   };
   // Меняет статус магазина "Филиал-получатель"
