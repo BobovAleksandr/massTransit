@@ -20,12 +20,11 @@ class Shop {
     newShopElement.querySelector('.table-data-item-value').textContent = this.itemTotalValue
     const currentShipValueInput = newShopElement.querySelector('.input-shipping-value')
     currentShipValueInput.addEventListener('change', (evt) => {
-      if (+currentShipValueInput.value <= this.itemValue) {
+      if (+currentShipValueInput.value <= this.itemTotalValue) {
         this.currentShipValue = +currentShipValueInput.value
-        console.log(this.currentShipValue)
       } else {
-        this.currentShipValue = this.itemValue
-        currentShipValueInput.value = this.itemValue
+        this.currentShipValue = this.itemTotalValue
+        currentShipValueInput.value = this.itemTotalValue
       }
     })
     return newShopElement
@@ -60,10 +59,50 @@ class Shop {
     this.itemToShipValue = value
   };
   fillItemSpecificValues = function() { // Заполняет количеством товаров не на витрине и под равномерную отгрузку
-    this.ItemNotForEmptyValue = this.type === 'Склад' ? this.itemTotalValue - 1 : Math.floor(this.itemTotalValue / 2)
-    this.itemNewValue = this.type === 'Технопоинт' || this.type === 'Склад' ? this.itemTotalValue : this.itemTotalValue - 1
+    if (this.itemTotalValue > 0) {
+      this.itemNotForEmptyValue = this.type === 'Склад' ? this.itemTotalValue - 1 : Math.floor(this.itemTotalValue / 2)
+      this.itemNewValue = this.type === 'Технопоинт' || this.type === 'Склад' ? this.itemTotalValue : this.itemTotalValue - 1
+    }
+  };
+  calculatePriority = function(prioritySettings) { // Заполняет числом-эквивалентом приоритетности отгрузки
+    let shopPriorityValue = this.name in prioritySettings && this.type !== 'Склад' ? prioritySettings[this.name] : 
+                            this.type === 'Склад' ? 0 : 1
+    this.priority = (prioritySettings[this.group] + prioritySettings[this.warehouse] + shopPriorityValue)
   };
 }
+
+// Настройки приоритетности отгрузок. Чем МЕНЬШЕ суммарное значение, тем ВЫШЕ приоритет отгрузки
+export const prioritySettings = {
+  // Склады - тысячи
+  'Пермь Склад': 1000,
+  'Екатеринбург Склад': 2000,
+  'Челябинск Склад': 3000,
+  'Сургут ТП': 4000,
+  // РРСы - сотни
+  'Пермь': 100,
+  'Пермский край': 200,
+  'Екб': 100,
+  'СВО 1': 200,
+  'СВО 2': 300,
+  'Север 1': 400,
+  'Север 2': 500,
+  'Тюмень': 600,
+  'Тюменская обл': 700,
+  'ЧБ': 700,
+  'ЧБО 1': 800,
+  // Филиалы - десятки и единицы
+  // 'Пермь ТЦ Лайнер ТП': 99 - наименьший приоритет для филиала
+  // 'Пермь ТЦ Домино': 1 - наибольший риоритет для филиала
+}
+
+// Список возможных филиалов-получателей
+export const recievers = [
+  'Пермь ТК Чкаловский ТП',
+  'Пермь Космонавтов ТП',
+  'Пермь ТЦ Лайнер ТП',
+  'Пермь Склад',
+  'Екатеринбург Склад',
+]
 
 // Массив филиалов { Код филиала, Название филиала, Тип филиала, РРЦ, РРС }
 export const shopList = [
@@ -399,21 +438,5 @@ export const shopList = [
   new Shop('3 023', 'Челябинск Склад', 'Склад', 'Челябинск Склад', 'ЧБ' ),
 ]
 
-// Назначаем приоритетность отгрузки
-shopList.forEach(shop => { 
-  shop.group === 'Пермь' ? shop.priority = 1 : false
-  shop.group === 'Пермский край' ? shop.priority = 2 : false
-  shop.name === 'Пермь Склад' ? shop.priority = 0.5 : false
-  shop.group === 'Екб' && shop.warehouse === 'Екатеринбург Склад' ? shop.priority = 3 : false
-  shop.group !== 'Екб' && shop.warehouse === 'Екатеринбург Склад' ? shop.priority = 4 : false
-  shop.name === 'Екатеринбург Склад' ? shop.priority = 2.5 : false
-  shop.group === 'ЧБ' && shop.warehouse === 'Челябинск Склад' ? shop.priority = 5 : false
-  shop.group !== 'ЧБ' && shop.warehouse === 'Челябинск Склад' ? shop.priority = 6 : false
-})
-
-// Сортируем массив магазинов по приоритету отгрузки
-shopList.sort((a,b) => a.priority - b.priority)
 
 
-
-// TODO Добавить специфичность в цифровом виде

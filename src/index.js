@@ -1,6 +1,6 @@
 import './styles/index.css'
 import readXlsxFile from 'read-excel-file'
-import { shopList } from './shops.js'
+import { shopList, prioritySettings, recievers } from './shops.js'
 
 const inputLoadFile = document.querySelector('.input-file-add')
 const shopListRowTemplate = document.querySelector('#shopListRowTemplate').content
@@ -20,19 +20,11 @@ const checkboxDontMakeEmpty = formAuto.elements['checkbox-item-dont-to-make-empt
 const shippingListRowTemplate = document.querySelector('#resultRowTemplate').content
 const tableResult = document.querySelector('.table-result')
 
-const recievers = [
-  'Пермь ТК Чкаловский ТП',
-  'Пермь Космонавтов ТП',
-  'Пермь ТЦ Лайнер ТП',
-  'Пермь Склад',
-  'Екатеринбург Склад',
-]
-
 // Заполняет магазины количеством товара из таблицы
 function fillShopsWithValues(data) {
   shopList.forEach(shop => {
     shop.fillTotalValue(data)
-    shop.fillItemSpecificValues
+    shop.fillItemSpecificValues()
   })
 }
   
@@ -48,7 +40,7 @@ function renderShopTable() {
 }
   
 // Рендерит опции выбора филиала-получателя
-function renderRecieveroptions(recievers, template) {
+function renderRecieverOptions(recievers, template) {
   const filteredShoplist = shopList.filter(shop => recievers.includes(shop.name))
   filteredShoplist.forEach(shop => {
     selectShopReciever.append(
@@ -57,14 +49,24 @@ function renderRecieveroptions(recievers, template) {
   })
 }
 
+// Заполняет филиалы числом-эквивалентом приоритетности отгрузки
+function fillShopPriority(priority) {
+  shopList.forEach(shop => {
+    shop.calculatePriority(priority)
+  })
+  shopList.sort((a,b) => a.priority - b.priority)
+}
+
 // Обработка excel-файла и зпуск функций после неё  
 inputLoadFile.addEventListener('change', () => {
   readXlsxFile(inputLoadFile.files[0])
     .then(excelData => {
-      excelData.filter(shop => shop[0] !== '#ERROR_undefined' && shop[1] !== '#ERROR_undefined' && shop[2] !== '#ERROR_undefined')
-      fillShopsWithValues(excelData)
-      renderShopTable()
-      renderRecieveroptions(recievers, optionShopRecieverTemplate)
+      excelData = excelData.filter(shop => shop[0] !== '#ERROR_undefined' && shop[1] !== '#ERROR_undefined' && shop[2] !== '#ERROR_undefined' && shop[2] > 0)
+      fillShopsWithValues(excelData)                                // Количетсов товаров
+      fillShopPriority(prioritySettings)                            // Приоритетность отгрузки
+      renderShopTable()                                             // Рендер таблицы филиалов
+      renderRecieverOptions(recievers, optionShopRecieverTemplate)  // Рендер списка опций филиала-получателя
+      console.log(shopList)
     })
 })
 
