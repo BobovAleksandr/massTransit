@@ -1,23 +1,24 @@
 class Shop {
   constructor(id, name, type, warehouse, group) {
-    this.id = id                // Код филиала из 1С
-    this.name = name            // Название филиала из 1С
-    this.type = type            // Тип филиала {Розница / Технопоинт / Склад}
-    this.warehouse = warehouse  // РРЦ привязки
-    this.group = group          // РРС
+    this.id = id
+    this.name = name
+    this.type = type
+    this.warehouse = warehouse
+    this.group = group
   };
-  isCurrentReciever = false;    // Является ли филиил текущим ФО
-  itemTotalValue = 0;           // Количество товаров всего
-  itemNewValue = 0;             // Количество товаров не на витрине
-  itemNotForEmptyValue = 0;     // Количество товаров для равномерной отгрузки
-  itemToShipValue = 0;          // Количество товаров для отгрузки
-  currentShipValue = 0;         // Количество товаров, ккоторые отгрузятся
-  priority;                     // Приоритет отгрузки
-  ;
-  createShopListRowElement = function(template) { // Возвращает элемент строки таблицы для списка магазинов
+  isCurrentReciever = false;
+  itemValue = 0;
+  newItemValue = 0;
+  notForEmptyValue = 0;
+  toShipValue = 0;
+  currentShipValue = 0;
+  priority;
+  renderResultTable;
+  // Возвращает элемент строки таблицы для списка магазинов
+  createShopListRowElement = function(template) {
     const newShopElement = template.cloneNode(true)
     newShopElement.querySelector('.table-data-shop-name').textContent = this.name
-    newShopElement.querySelector('.table-data-item-value').textContent = this.itemTotalValue
+    newShopElement.querySelector('.table-data-item-value').textContent = this.itemValue
     const currentShipValueInput = newShopElement.querySelector('.input-shipping-value')
     currentShipValueInput.addEventListener('change', (evt) => {
       if (+currentShipValueInput.value <= this.itemValue) {
@@ -27,45 +28,43 @@ class Shop {
         this.currentShipValue = this.itemValue
         currentShipValueInput.value = this.itemValue
       }
+      this.renderResultTable()
+      this.resetToShipValue(evt)
     })
     return newShopElement
   };
-  createResultRowElement = function(template, recieverId, itemId) { // Возвращает элемент строки таблицы для списка отгрузок
+  // Возвращает элемент строки таблицы для списка отгрузок
+  createShippingListRowElement = function(template, recieverId, itemId) {
     const newShopElement = template.cloneNode(true)
     newShopElement.querySelector('.table-data-shop-shipper-name').textContent = this.name
     newShopElement.querySelector('.table-data-shop-shipper-id').textContent = this.id
     newShopElement.querySelector('.table-data-shop-reciever-id').textContent = recieverId
     newShopElement.querySelector('.table-data-shop-item-id').textContent = itemId
-    const toShipValue = newShopElement.querySelector('.table-data-shop-shipping-value')
-    toShipValue.textContent = this.currentShipValue
+    const toshipValue = newShopElement.querySelector('.table-data-shop-shipping-value')
+    toshipValue.textContent = this.currentShipValue
     return newShopElement
   };
-  createShopRecieverOption = function(template) { // Создаёт элемент: опцию для выбора филиала-получателя
-    const newOption = template.cloneNode(true)
-    newOption.querySelector('.option-shop-reciever').value = this.name
-    newOption.querySelector('.option-shop-reciever').textContent = this.name
-    return newOption
-  };
-  makeThisShopReciever = function(isReciever) { // Меняет статус магазина "Филиал-получатель"
+  // Меняет статус магазина "Филиал-получатель"
+  makeThisShopReciever = function(isReciever) {
     this.isCurrentReciever = isReciever
     if (this.isCurrentReciever) {
-      this.itemToShipValue = 0
+      this.toShipValue = 0
     }
   };
-  fillTotalValue = function(currentShopsArray) { // Заполняет количеством товара
-    const currentShop = currentShopsArray.find(shop => shop[1] === this.name)
-    this.itemTotalValue = currentShop === undefined ? 0 : currentShop[2]
+  // Заполнить количество товара для отгрузки
+  fillToShipValue = function(value) {
+    this.toShipValue = value
   };
-  fillToShipValue = function(value) { // Заполняет количеством товара для отгрузки
-    this.itemToShipValue = value
-  };
-  fillItemSpecificValues = function() { // Заполняет количеством товаров не на витрине и под равномерную отгрузку
-    this.ItemNotForEmptyValue = this.type === 'Склад' ? this.itemTotalValue - 1 : Math.floor(this.itemTotalValue / 2)
-    this.itemNewValue = this.type === 'Технопоинт' || this.type === 'Склад' ? this.itemTotalValue : this.itemTotalValue - 1
-  };
+  resetToShipValue = function(evt) {
+    if (this.isCurrentReciever === true) {
+      evt.target.value = 0
+      this.toShipValue = 0
+    }
+  }
 }
 
-// Массив филиалов { Код филиала, Название филиала, Тип филиала, РРЦ, РРС }
+// Создаем филиалы
+// Код филиала, Название филиала, Тип филиала, РРЦ, РРС
 export const shopList = [
   new Shop('3 728', 'Пермь DNS Гайва', 'Розница', 'Пермь Склад', 'Пермь' ),
   new Shop('215', 'Пермь Айсберг', 'Розница', 'Пермь Склад', 'Пермь' ),
@@ -400,7 +399,7 @@ export const shopList = [
 ]
 
 // Назначаем приоритетность отгрузки
-shopList.forEach(shop => { 
+shopList.forEach(shop => {
   shop.group === 'Пермь' ? shop.priority = 1 : false
   shop.group === 'Пермский край' ? shop.priority = 2 : false
   shop.name === 'Пермь Склад' ? shop.priority = 0.5 : false
@@ -411,9 +410,17 @@ shopList.forEach(shop => {
   shop.group !== 'ЧБ' && shop.warehouse === 'Челябинск Склад' ? shop.priority = 6 : false
 })
 
+// Наполняем варианты филиала-получателя
+shopList.forEach(shop => {
+  if (shop.group === "Пермь" || shop.group === "Пермский край") {
+    shop.createShopRecieverOption = function(optionShopRecieverTemplate) {
+      const newOption = optionShopRecieverTemplate.cloneNode(true)
+      newOption.querySelector('.option-shop-reciever').value = this.name
+      newOption.querySelector('.option-shop-reciever').textContent = this.name
+      return newOption
+    }
+  }
+})
+
 // Сортируем массив магазинов по приоритету отгрузки
 shopList.sort((a,b) => a.priority - b.priority)
-
-
-
-// TODO Добавить специфичность в цифровом виде
