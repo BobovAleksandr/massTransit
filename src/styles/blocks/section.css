@@ -10,10 +10,8 @@
   display: flex;
   flex-direction: column;
   gap: 30px;
-}
-
-.section-shop-list {
-
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .section-settings {

@@ -1,0 +1,20 @@
+.section-total-info {
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+  min-width: 537px;
+}
+
+.table-cell-name {
+  min-width: 190px;
+  border-right: 1px solid var(--color-table);
+}
+
+.table-cell-value {
+  margin-inline-start: 10px;
+  display: flex;
+}
+
+.section-total-info__table-row:not(:last-of-type) .section-total-info__table-cell {
+  padding-block-end: 5px;
+}

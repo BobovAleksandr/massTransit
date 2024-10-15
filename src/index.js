@@ -20,6 +20,21 @@ const checkboxDontMakeEmpty = formAuto.elements['checkbox-item-dont-to-make-empt
 const tableResult = document.querySelector('.table-result')
 const resultTableRowTemplate = document.querySelector('#resultRowTemplate').content
 
+// const totalInfoSectionConfig = {
+//   'Пермь Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Пермь Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+//   'Екатеринбург Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Екатеринбург Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+//   'Челябинск Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Челябинск Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+//   'Сургут ТП': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Сургут ТП').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+//   'Итого на филиалах': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Итого на филиалах').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+//   'Из них не на витринах': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Из них не на витринах').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
+// }
+
+const totalInfoWarehouseHeaders = [
+  'Пермь Склад',
+  'Екатеринбург Склад',
+  'Челябинск Склад',
+  'Сургут ТП',
+]
 
 // ------------------------------ Функции
 
@@ -113,6 +128,34 @@ function clearResultTable() {
   })
 }
 
+// Возвращает общее количество товаров
+function getSumOfItemTotalValues() {
+  return shopList.reduce((acc, shop) => {
+      return acc + shop.itemTotalValue
+    }, 0)
+}
+
+// Возвращает общее количество товаров не на витринах
+function getSumOfItemNewValues() {
+  return shopList.reduce((acc, shop) => {
+      return acc + shop.itemNewValue
+    }, 0)
+}
+
+// Возвращает элемент для заполнения количества товара по заголовку (строка)
+function findCurrentheaderValueElement(header) {
+  return [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === header).closest('.section-total-info__table-row').querySelector('.table-cell-value')
+}
+
+// Заполняет табличку с бщей инфой об остатках
+function calculateTotalInfoSection() {
+  totalInfoWarehouseHeaders.forEach(warehouseHeader => {
+    findCurrentheaderValueElement(warehouseHeader).textContent = findShopObject(warehouseHeader).itemTotalValue
+  })
+  findCurrentheaderValueElement('Итого на филиалах').textContent = getSumOfItemTotalValues()
+  findCurrentheaderValueElement('Из них не на витринах').textContent = getSumOfItemNewValues()
+}
+
 
 // ------------------------------ Слушатели
 
@@ -130,6 +173,7 @@ inputLoadFile.addEventListener('change', () => {
       fillShopPriority(prioritySettings)                            // Приоритетность отгрузки
       renderShopTable()                                             // Рендер таблицы филиалов
       renderRecieverOptions(recievers, optionShopRecieverTemplate)  // Рендер списка опций филиала-получателя
+      calculateTotalInfoSection()                                   // Заполняет табличку с бщей инфой об остатках
     })
 })
 
