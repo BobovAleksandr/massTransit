@@ -13,19 +13,13 @@ class Shop {
   itemToShipValue = 0;          // Количество товаров для отгрузки
   currentShipValue = 0;         // Количество товаров, ккоторые отгрузятся
   priority;                     // Приоритет отгрузки
-  ;
-  createShopListRowElement = function(template) { // Возвращает элемент строки таблицы для списка магазинов
+  createShopListRowElement = function(template, renderResultTable) { // Возвращает элемент строки таблицы для списка магазинов
     const newShopElement = template.cloneNode(true)
     newShopElement.querySelector('.table-data-shop-name').textContent = this.name
     newShopElement.querySelector('.table-data-item-value').textContent = this.itemTotalValue
     const currentShipValueInput = newShopElement.querySelector('.input-shipping-value')
     currentShipValueInput.addEventListener('change', (evt) => {
-      if (+currentShipValueInput.value <= this.itemTotalValue) {
-        this.currentShipValue = +currentShipValueInput.value
-      } else {
-        this.currentShipValue = this.itemTotalValue
-        currentShipValueInput.value = this.itemTotalValue
-      }
+      this.changeCurrentShipValue(+currentShipValueInput.value, renderResultTable)
     })
     return newShopElement
   };
@@ -39,6 +33,19 @@ class Shop {
     toShipValue.textContent = this.currentShipValue
     return newShopElement
   };
+  changeCurrentShipValue = function(newValue, renderResultTable) { // Меняет количество товара на отгрузку
+    this.currentShipValue = this.isCurrentReciever ? 0 :
+                            (newValue <= this.itemTotalValue) ? newValue :  
+                            this.itemTotalValue
+    this.changeCurrentShipInputValue()
+    renderResultTable()
+  };
+  changeCurrentShipInputValue = function() { // Заполняет числовой инпут ткущего элемента значением currentShipValue
+    const currentShopNames = [...document.querySelectorAll('.table-data-shop-name')]
+    const currentShopElement = currentShopNames.find(shopName => shopName.textContent === this.name).closest('.table-row')
+    const currentShopElementInput = currentShopElement.querySelector('.input-shipping-value')
+    currentShopElementInput.value = this.currentShipValue
+  };
   createShopRecieverOption = function(template) { // Создаёт элемент: опцию для выбора филиала-получателя
     const newOption = template.cloneNode(true)
     newOption.querySelector('.option-shop-reciever').value = this.name
@@ -47,16 +54,10 @@ class Shop {
   };
   makeThisShopReciever = function(isReciever) { // Меняет статус магазина "Филиал-получатель"
     this.isCurrentReciever = isReciever
-    if (this.isCurrentReciever) {
-      this.itemToShipValue = 0
-    }
   };
   fillTotalValue = function(currentShopsArray) { // Заполняет количеством товара
     const currentShop = currentShopsArray.find(shop => shop[1] === this.name)
     this.itemTotalValue = currentShop === undefined ? 0 : currentShop[2]
-  };
-  fillToShipValue = function(value) { // Заполняет количеством товара для отгрузки
-    this.itemToShipValue = value
   };
   fillItemSpecificValues = function() { // Заполняет количеством товаров не на витрине и под равномерную отгрузку
     if (this.itemTotalValue > 0) {
@@ -66,7 +67,8 @@ class Shop {
   };
   calculatePriority = function(prioritySettings) { // Заполняет числом-эквивалентом приоритетности отгрузки
     let shopPriorityValue = this.name in prioritySettings && this.type !== 'Склад' ? prioritySettings[this.name] : 
-                            this.type === 'Склад' ? 0 : 1
+                            this.type === 'Склад' ? 0 : 
+                            1
     this.priority = (prioritySettings[this.group] + prioritySettings[this.warehouse] + shopPriorityValue)
   };
 }
@@ -437,6 +439,4 @@ export const shopList = [
   new Shop('2 018', 'Екатеринбург Склад', 'Склад', 'Екатеринбург Склад', 'Екб' ),
   new Shop('3 023', 'Челябинск Склад', 'Склад', 'Челябинск Склад', 'ЧБ' ),
 ]
-
-
 

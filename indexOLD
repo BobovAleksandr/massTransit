@@ -175,7 +175,6 @@ inputItemValue.addEventListener('input', evt => {
   disableButton(isValueEmpty)
 })
 
-checkboxItemNew.addEventListener('change', uncheckShipOption)
-checkboxDontMakeEmpty.addEventListener('change', uncheckShipOption)
+
 
 
