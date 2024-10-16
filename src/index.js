@@ -133,6 +133,14 @@ function getSumOfItemTotalValues() {
     }, 0)
 }
 
+// Возвращает общее количество товаров на складах
+function getSumOfItemTotalWarehouseValues() {
+  const warehouseList = shopList.filter(shop => shop.type === 'Склад')
+  return warehouseList.reduce((acc, shop) => {
+      return acc + shop.itemTotalValue
+    }, 0)
+}
+
 // Возвращает общее количество товаров не на витринах
 function getSumOfItemNewValues() {
   return shopList.reduce((acc, shop) => {
@@ -141,24 +149,29 @@ function getSumOfItemNewValues() {
 }
 
 // Возвращает элемент для заполнения количества товара по заголовку (строка)
-function findCurrentheaderValueElement(header) {
+function findCurrentHeaderValueElement(header) {
   return [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === header).closest('.section-total-info__table-row').querySelector('.table-cell-value')
 }
 
 // Заполняет табличку с бщей инфой об остатках
 function calculateTotalInfoSection() {
   totalInfoWarehouseHeaders.forEach(warehouseHeader => {
-    findCurrentheaderValueElement(warehouseHeader).textContent = findShopObject(warehouseHeader).itemTotalValue
+    findCurrentHeaderValueElement(warehouseHeader).textContent = findShopObject(warehouseHeader).itemTotalValue
   })
-  findCurrentheaderValueElement('Итого на филиалах').textContent = getSumOfItemTotalValues()
-  findCurrentheaderValueElement('Из них не на витринах').textContent = getSumOfItemNewValues()
+  findCurrentHeaderValueElement('Итого на филиалах').textContent = (getSumOfItemTotalValues() - getSumOfItemTotalWarehouseValues())
+  findCurrentHeaderValueElement('Из них не на витринах').textContent = (getSumOfItemNewValues() - getSumOfItemTotalWarehouseValues())
+}
+
+// Возвращает текущую сумму отгружаемых товаров итого
+function getCurrentShipTotalValue() {
+  return shopList.reduce((acc, shop) => {
+    return acc + shop.currentShipValue
+  }, 0)
 }
 
 // Меняет количество отгружаемого товара в блоке инфы об отгрузках
 function changeShipInfo() {
-  const currentShipTotalValue = shopList.reduce((acc, shop) => {
-    return acc + shop.currentShipValue
-  }, 0)
+  const currentShipTotalValue = getCurrentShipTotalValue()
   currentShipValueElement.textContent = currentShipTotalValue
   if (inputItemValue.value && currentShipTotalValue > 0) {
     let isOk = currentShipTotalValue >= inputItemValue.value
@@ -183,6 +196,40 @@ function showShipInfoError(isOk, currentShipValue) {
   currentShipInfoErrorElement.textContent = currentErrorText
 }
 
+// Заполняет максимальное количество товаров для отгрузки в зависимости от настроек автоотгрузки
+function fillItemToShipValues() {
+  shopList.forEach(shop => {
+    shop.itemToShipValue = checkboxItemNew.checked ? shop.itemNewValue :
+                           checkboxDontMakeEmpty.checked ? shop.itemNotForEmptyValue :
+                           shop.itemTotalValue
+    if (checkboxNotWarehouse.checked && shop.type === 'Склад') {
+      shop.itemToShipValue = 0
+    }
+  })
+}
+
+// TODO - Ошибка при превышении количества товара на филиалах
+// ToDO - Проверка при равномерной отгрузке
+
+// Автоматически заполняет количество отгружаемых товаров
+function autoCalculateShipValues() {
+  resetAllCurrentShipValues()
+  for (let i = 0; i < +inputItemValue.value; i++) {
+    const currentNotFullShippedShop = shopList.find(shop => shop.currentShipValue < shop.itemToShipValue)
+    if (getCurrentShipTotalValue() < +inputItemValue.value) {
+      let currentShipValue = currentNotFullShippedShop.currentShipValue + 1
+      currentNotFullShippedShop.changeCurrentShipValue(currentShipValue, false)
+      currentShipValue++
+    }
+  }
+}
+
+// Сбрасывает все выбранные отгрузки со всех илиалов
+function resetAllCurrentShipValues() {
+  shopList.forEach(shop => {
+    shop.changeCurrentShipValue(0, false)
+  })
+}
 
 // ------------------------------ Слушатели
 
@@ -212,7 +259,6 @@ selectShopReciever.addEventListener('change', (evt) => {
 // Слушатель ввода количества товара для авто отгрузки
 inputItemValue.addEventListener('input', (evt) => {
   disableSubmitButton(evt.target.value)                             // Активация \ деактивация кнопки "ОК"
-  changeShipInfo()
 })
 
 // Слушатель изменения инпута кода товара
@@ -222,6 +268,10 @@ inputItemId.addEventListener('change', (evt) => {
 
 formAuto.addEventListener('submit', (evt) => {
   evt.preventDefault()
+  fillItemToShipValues()                                            // Заполнить максимальное количестов товаров
+  autoCalculateShipValues()                                         // Автоматически заполнить количество отгружаемых товаров
+  changeShipInfo()                                                  // Обновление инфы об отгрузках
+  renderResultTable()
 })
 
 

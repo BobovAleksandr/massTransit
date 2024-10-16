@@ -38,13 +38,16 @@ class Shop {
                             (newValue <= this.itemTotalValue) ? newValue :  
                             this.itemTotalValue
     this.changeCurrentShipInputValue()
-    renderResultTable()
+    if (renderResultTable) renderResultTable()
   };
-  changeCurrentShipInputValue = function() { // Заполняет числовой инпут ткущего элемента значением currentShipValue
+  changeCurrentShipInputValue = function() { // Заполняет числовой инпут текущего элемента значением currentShipValue
     const currentShopNames = [...document.querySelectorAll('.table-data-shop-name')]
-    const currentShopElement = currentShopNames.find(shopName => shopName.textContent === this.name).closest('.table-row')
-    const currentShopElementInput = currentShopElement.querySelector('.input-shipping-value')
-    currentShopElementInput.value = this.currentShipValue
+    const currentShopElement = currentShopNames.find(shopName => shopName.textContent === this.name)?.closest('.table-row')
+    if (currentShopElement) {
+      const currentShopElementInput = currentShopElement?.querySelector('.input-shipping-value')
+      currentShopElementInput.value = this.currentShipValue
+
+    }
   };
   createShopRecieverOption = function(template) { // Создаёт элемент: опцию для выбора филиала-получателя
     const newOption = template.cloneNode(true)
