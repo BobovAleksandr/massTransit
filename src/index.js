@@ -20,14 +20,10 @@ const checkboxDontMakeEmpty = formAuto.elements['checkbox-item-dont-to-make-empt
 const tableResult = document.querySelector('.table-result')
 const resultTableRowTemplate = document.querySelector('#resultRowTemplate').content
 
-// const totalInfoSectionConfig = {
-//   'Пермь Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Пермь Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-//   'Екатеринбург Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Екатеринбург Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-//   'Челябинск Склад': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Челябинск Склад').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-//   'Сургут ТП': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Сургут ТП').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-//   'Итого на филиалах': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Итого на филиалах').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-//   'Из них не на витринах': [...document.querySelectorAll('.table-cell-name')].find(el => el.innerText === 'Из них не на витринах').closest('.section-total-info__table-row').querySelector('.table-cell-value'),
-// }
+const currentShipValueElement = document.querySelector('.table-cell-value.section-shipping-info__table-cell')
+const currentShipInfoStatusElement = document.querySelector('.section-shipping-info__status')
+const currentShipInfoErrorElement = document.querySelector('.section-shipping-info__error')
+
 
 const totalInfoWarehouseHeaders = [
   'Пермь Склад',
@@ -35,6 +31,7 @@ const totalInfoWarehouseHeaders = [
   'Челябинск Склад',
   'Сургут ТП',
 ]
+
 
 // ------------------------------ Функции
 
@@ -118,6 +115,7 @@ function renderResultTable() {
       )
     }
   })
+  changeShipInfo()
 }
 
 // Очищает итоговую таблицу
@@ -156,6 +154,35 @@ function calculateTotalInfoSection() {
   findCurrentheaderValueElement('Из них не на витринах').textContent = getSumOfItemNewValues()
 }
 
+// Меняет количество отгружаемого товара в блоке инфы об отгрузках
+function changeShipInfo() {
+  const currentShipTotalValue = shopList.reduce((acc, shop) => {
+    return acc + shop.currentShipValue
+  }, 0)
+  currentShipValueElement.textContent = currentShipTotalValue
+  if (inputItemValue.value && currentShipTotalValue > 0) {
+    let isOk = currentShipTotalValue >= inputItemValue.value
+    changeShipInfoStatus(isOk)
+    showShipInfoError(isOk, currentShipTotalValue)
+  } else {
+    currentShipInfoStatusElement.textContent = ''
+    currentShipInfoErrorElement.textContent = ''
+  }
+}
+
+// Меняет статус полноты объема отгрузок в блоке инфы об отгрузках
+function changeShipInfoStatus(isOk) {
+  const currentStatusText = isOk ? 'Все товары будут отгружены' : 'Не все товары будут отгружены'
+  currentShipInfoStatusElement.textContent = currentStatusText
+  isOk ? currentShipInfoStatusElement.classList.add('text-ok') : currentShipInfoStatusElement.classList.remove('text-ok')
+}
+
+// Отображает ошибку блока инфы об отгрузках
+function showShipInfoError(isOk, currentShipValue) {
+  let currentErrorText = isOk ? '' : `Не хватает ${inputItemValue.value - currentShipValue} штук.`
+  currentShipInfoErrorElement.textContent = currentErrorText
+}
+
 
 // ------------------------------ Слушатели
 
@@ -185,6 +212,7 @@ selectShopReciever.addEventListener('change', (evt) => {
 // Слушатель ввода количества товара для авто отгрузки
 inputItemValue.addEventListener('input', (evt) => {
   disableSubmitButton(evt.target.value)                             // Активация \ деактивация кнопки "ОК"
+  changeShipInfo()
 })
 
 // Слушатель изменения инпута кода товара
@@ -192,5 +220,8 @@ inputItemId.addEventListener('change', (evt) => {
   renderResultTable()                                               // Рендер таблицы результатов
 })
 
+formAuto.addEventListener('submit', (evt) => {
+  evt.preventDefault()
+})
 
 

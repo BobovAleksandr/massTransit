@@ -5,6 +5,7 @@
 @import url('./blocks/section.css');
 @import url('./blocks/table.css');
 @import url('./blocks/section-total-info.css');
+@import url('./blocks/section-shipping-info.css');
 
 .page {
   font-family: 'DNS RotondaC', sans-serif;
@@ -50,4 +51,12 @@
 
 .input-shipping-value {
   width: 40px;
+}
+
+.text-error {
+  color: red;
+}
+
+.text-ok {
+  color: rgb(0, 165, 0);
 }
