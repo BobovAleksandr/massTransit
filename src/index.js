@@ -208,15 +208,12 @@ function fillItemToShipValues() {
   })
 }
 
-// TODO - Ошибка при превышении количества товара на филиалах
-// ToDO - Проверка при равномерной отгрузке
-
 // Автоматически заполняет количество отгружаемых товаров
 function autoCalculateShipValues() {
   resetAllCurrentShipValues()
   for (let i = 0; i < +inputItemValue.value; i++) {
-    const currentNotFullShippedShop = shopList.find(shop => shop.currentShipValue < shop.itemToShipValue)
-    if (getCurrentShipTotalValue() < +inputItemValue.value) {
+    const currentNotFullShippedShop = shopList.find(shop => (shop.currentShipValue < shop.itemToShipValue && shop.isCurrentReciever === false))
+    if (getCurrentShipTotalValue() < +inputItemValue.value && currentNotFullShippedShop) {
       let currentShipValue = currentNotFullShippedShop.currentShipValue + 1
       currentNotFullShippedShop.changeCurrentShipValue(currentShipValue, false)
       currentShipValue++
@@ -230,6 +227,26 @@ function resetAllCurrentShipValues() {
     shop.changeCurrentShipValue(0, false)
   })
 }
+
+function selectResut() {
+  let resultTable = ''
+  const resultTableRowArray = [...document.querySelectorAll('.result-table-row')]
+  resultTableRowArray.forEach(rowElement => {
+    const shipId = rowElement.querySelector('.table-data-shop-shipper-id').textContent
+    const recieverId = rowElement.querySelector('.table-data-shop-reciever-id').textContent
+    const itemId = rowElement.querySelector('.table-data-shop-item-id').textContent
+    const itemValue = rowElement.querySelector('.table-data-shop-shipping-value').textContent
+    resultTable = resultTable + `${shipId}\t${recieverId}\t${itemId}\t${itemValue}\n`
+  })
+  navigator.clipboard.writeText(resultTable)
+  .then(() => {
+    console.log(resultTable);
+  })
+  .catch(() => {
+    console.log("something went wrong");
+  });
+}
+
 
 // ------------------------------ Слушатели
 

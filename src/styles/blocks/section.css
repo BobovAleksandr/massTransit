@@ -41,15 +41,6 @@
   grid-column: 1 / 2;
 }
 
-
-.section-total-info {
-
-}
-
-.section-shipping-info {
-
-}
-
 .section-title {
   text-align: center;
   font-size: 18px;
@@ -66,4 +57,36 @@
 .table-header-item-id {
   min-width: 100px;
 }
+
+.section-result {
+  position: relative;
+}
+
+.section-result:hover {
+  filter: blur(2px);
+  opacity: 0.5;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.section-result:hover .section-result-cover {
+  visibility: visible;
+}
+
+.section-result:hover:after {
+  position: absolute;
+  border-radius: 10px;
+  content: '';
+  inset: 0;
+  cursor: pointer;
+}
+
+.section-result-cover {
+  position: absolute;
+  width: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+  visibility: hidden;
+}
+
+
 
