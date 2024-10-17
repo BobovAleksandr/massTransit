@@ -6,8 +6,21 @@
   <title>Excel</title>
 </head>
 <body class="page">
+  <dialog class="dialog-add-file">
+    <div class="dialog-add-file__wrapper">
+      <div class="dialog-add-file__headers">
+        <h2 class="dialog-add-file__title dialog-title">
+          Загрузите файл с остатками
+        </h2>
+        <h3 class="dialog-subtitle">Файл должен быть с расширением .xlsx</h3>
+      </div>
+      <label for="input-file-add" class="dialog-add-file__label">
+        Выбрать
+      </label>
+      <input type="file" class="input-file-add" name="input-file-add" id="input-file-add" accept=".xlsx" hidden>
+    </div>
+  </dialog>
   <section class="section section-shop-list">
-    <input type="file" class="input-file-add" name="input-file-add" accept=".xlsx">
     <table class="table table-shop-list">
       <tr class="table-row-headers">
         <th class="table-header table-header-shop-name">Филиал</th>
@@ -140,16 +153,16 @@
         <th class="table-header table-header-shipping-value">Кол-во</th>
       </tr>
     </table>
-    <div class="section-result-cover">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <g stroke="#292D32" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-          <path fill="transparent" d="M22 11.1V6.9C22 3.4 20.6 2 17.1 2h-4.2C9.4 2 8 3.4 8 6.9V8h3.1c3.5 0 4.9 1.4 4.9 4.9V16h1.1c3.5 0 4.9-1.4 4.9-4.9Z" opacity=".4"/>
-          <path fill="transparent" d="M16 17.1v-4.2C16 9.4 14.6 8 11.1 8H6.9C3.4 8 2 9.4 2 12.9v4.2C2 20.6 3.4 22 6.9 22h4.2c3.5 0 4.9-1.4 4.9-4.9Z"/>
-          <path class="svg-check-icon hidden" fill="transparent" d="m6.08 15 1.95 1.95 3.89-3.9"/>
-        </g>
-      </svg>
-    </div>
   </section>
+  <div class="section-result-cover">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g stroke="#292D32" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+        <path fill="transparent" d="M22 11.1V6.9C22 3.4 20.6 2 17.1 2h-4.2C9.4 2 8 3.4 8 6.9V8h3.1c3.5 0 4.9 1.4 4.9 4.9V16h1.1c3.5 0 4.9-1.4 4.9-4.9Z"/>
+        <path fill="transparent" d="M16 17.1v-4.2C16 9.4 14.6 8 11.1 8H6.9C3.4 8 2 9.4 2 12.9v4.2C2 20.6 3.4 22 6.9 22h4.2c3.5 0 4.9-1.4 4.9-4.9Z"/>
+        <path class="svg-check-icon hidden" fill="transparent" d="m6.08 15 1.95 1.95 3.89-3.9"/>
+      </g>
+    </svg>
+  </div>
   <template id="shopListRowTemplate">
     <tr class="table-row">
       <td class="table-data table-data-shop-name"></td>

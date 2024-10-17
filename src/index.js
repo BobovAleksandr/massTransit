@@ -24,6 +24,10 @@ const currentShipValueElement = document.querySelector('.table-cell-value.sectio
 const currentShipInfoStatusElement = document.querySelector('.section-shipping-info__status')
 const currentShipInfoErrorElement = document.querySelector('.section-shipping-info__error')
 
+const sectionResult = document.querySelector('.section-result')
+const sectionResultCoverCheck = document.querySelector('.svg-check-icon')
+
+const dialogAddFile = document.querySelector('.dialog-add-file')
 
 const totalInfoWarehouseHeaders = [
   'Пермь Склад',
@@ -95,8 +99,8 @@ function changeCurrentReciever(evt) {
 }
 
 // Активирует и деактивирует кнопку "ОК" исходя из заполненности инпута количества товара
-function disableSubmitButton(inputIsEmpty) {
-  if (inputIsEmpty) {
+function disableSubmitButton(itemsItemValueInputStatus, recieverInputStatus, itemIdInputStatus) {
+  if (itemsItemValueInputStatus && recieverInputStatus && itemIdInputStatus) {
     formAutoSubmitButton.disabled = false
     formAutoSubmitButton.classList.remove('disabled')
   } else {
@@ -107,15 +111,17 @@ function disableSubmitButton(inputIsEmpty) {
 
 // Рендерит итоговую таблицу
 function renderResultTable() {
-  clearResultTable()
-  shopList.forEach(shop => {
-    if (shop.currentShipValue > 0) {
-      tableResult.append(
-        shop.createResultRowElement(resultTableRowTemplate, findShopObject(selectShopReciever.value)?.id, inputItemId.value)
-      )
-    }
-  })
-  changeShipInfo()
+  if (inputItemId.value && selectShopReciever.value) {
+    clearResultTable()
+    shopList.forEach(shop => {
+      if (shop.currentShipValue > 0) {
+        tableResult.append(
+          shop.createResultRowElement(resultTableRowTemplate, findShopObject(selectShopReciever.value)?.id, inputItemId.value)
+        )
+      }
+    })
+    changeShipInfo()
+  }
 }
 
 // Очищает итоговую таблицу
@@ -228,7 +234,8 @@ function resetAllCurrentShipValues() {
   })
 }
 
-function selectResut() {
+// Копирует в буфер обмена инфу из итоговой таблицы
+function copyResutTable() {
   let resultTable = ''
   const resultTableRowArray = [...document.querySelectorAll('.result-table-row')]
   resultTableRowArray.forEach(rowElement => {
@@ -247,6 +254,14 @@ function selectResut() {
   });
 }
 
+// Воспроизвоит анимацию галочки иконки копирования
+function resultTableCoverAnimation() {
+  sectionResultCoverCheck.classList.remove('hidden')
+  setInterval(() => {
+    sectionResultCoverCheck.classList.add('hidden')
+  }, 1000);
+}
+
 
 // ------------------------------ Слушатели
 
@@ -263,6 +278,7 @@ inputLoadFile.addEventListener('change', () => {
       fillShopsWithValues(excelData)                                // Количетсов товаров
       fillShopPriority(prioritySettings)                            // Приоритетность отгрузки
       renderShopTable()                                             // Рендер таблицы филиалов
+      dialogAddFile.close()                                         // Закрыть окно выбора файла
       renderRecieverOptions(recievers, optionShopRecieverTemplate)  // Рендер списка опций филиала-получателя
       calculateTotalInfoSection()                                   // Заполняет табличку с бщей инфой об остатках
     })
@@ -275,12 +291,28 @@ selectShopReciever.addEventListener('change', (evt) => {
 
 // Слушатель ввода количества товара для авто отгрузки
 inputItemValue.addEventListener('input', (evt) => {
-  disableSubmitButton(evt.target.value)                             // Активация \ деактивация кнопки "ОК"
+  disableSubmitButton(inputItemValue.value, selectShopReciever.value, inputItemId.value)                             // Активация \ деактивация кнопки "ОК"
+})
+
+selectShopReciever.addEventListener('change', (evt) => {
+  disableSubmitButton(inputItemValue.value, selectShopReciever.value, inputItemId.value)                             // Активация \ деактивация кнопки "ОК"
+})
+
+inputItemId.addEventListener('input', (evt) => {
+  disableSubmitButton(inputItemValue.value, selectShopReciever.value, inputItemId.value)                             // Активация \ деактивация кнопки "ОК"
 })
 
 // Слушатель изменения инпута кода товара
 inputItemId.addEventListener('change', (evt) => {
-  renderResultTable()                                               // Рендер таблицы результатов
+  renderResultTable()
+  if (!inputItemId.value) {
+    clearResultTable()                                              // Рендер таблицы результатов
+  }                                              
+})
+
+sectionResult.addEventListener('click', () => {
+  copyResutTable()                                                  // Скопировать результат
+  resultTableCoverAnimation()                                       // Анимация статуса копирования
 })
 
 formAuto.addEventListener('submit', (evt) => {
@@ -291,4 +323,4 @@ formAuto.addEventListener('submit', (evt) => {
   renderResultTable()
 })
 
-
+dialogAddFile.showModal()

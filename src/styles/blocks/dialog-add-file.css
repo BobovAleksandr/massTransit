@@ -1,0 +1,51 @@
+.dialog-add-file {
+  border-radius: 10px;
+  max-width: 500px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  padding: 20px 30px;
+}
+
+.dialog-add-file__wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-add-file:focus {
+  outline: none;
+}
+
+.dialog-add-file::backdrop {
+  background-color: rgba(0, 0, 0, 0.95);
+}
+
+.dialog-add-file__headers {
+  text-align: center;
+}
+
+.dialog-title {
+  margin-bottom: 10px;
+}
+
+.dialog-subtitle {
+  font-size: 18px;
+}
+
+.dialog-add-file__label {
+  display: block;
+  padding: 1em 2em;
+  color: var(--color-dark);
+  border-radius: 10px;
+  border: 1px solid var(--color-dark);
+}
+
+.dialog-add-file__label:hover {
+  background-color: var(--color-table);
+}
+
+.dialog-add-file__label:active {
+  background-color: var(--color-background);
+}
