@@ -161,11 +161,14 @@ function findCurrentHeaderValueElement(header) {
 
 // Заполняет табличку с бщей инфой об остатках
 function calculateTotalInfoSection() {
+  const currentReciever = shopList.find(shop => shop.name === selectShopReciever.value)
+  const currentRecieverTotalValue = currentReciever ? currentReciever.itemTotalValue : 0
+  const currentRecieverNewValue = currentReciever ? currentReciever.itemNewValue : 0
   totalInfoWarehouseHeaders.forEach(warehouseHeader => {
     findCurrentHeaderValueElement(warehouseHeader).textContent = findShopObject(warehouseHeader).itemTotalValue
   })
-  findCurrentHeaderValueElement('Итого на филиалах').textContent = (getSumOfItemTotalValues() - getSumOfItemTotalWarehouseValues())
-  findCurrentHeaderValueElement('Из них не на витринах').textContent = (getSumOfItemNewValues() - getSumOfItemTotalWarehouseValues())
+  findCurrentHeaderValueElement('Итого на филиалах').textContent = (getSumOfItemTotalValues() - getSumOfItemTotalWarehouseValues() - currentRecieverTotalValue)
+  findCurrentHeaderValueElement('Из них не на витринах').textContent = (getSumOfItemNewValues() - getSumOfItemTotalWarehouseValues() - currentRecieverNewValue)
 }
 
 // Возвращает текущую сумму отгружаемых товаров итого
@@ -296,6 +299,7 @@ inputItemValue.addEventListener('input', (evt) => {
 
 selectShopReciever.addEventListener('change', (evt) => {
   disableSubmitButton(inputItemValue.value, selectShopReciever.value, inputItemId.value)                             // Активация \ деактивация кнопки "ОК"
+  calculateTotalInfoSection()
 })
 
 inputItemId.addEventListener('input', (evt) => {
